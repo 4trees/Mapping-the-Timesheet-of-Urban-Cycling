@@ -1,4 +1,4 @@
-var file = '/data/trip.csv';
+var file = 'data/trip.csv';
 var w = window.innerWidth,
     h = window.innerHeight;
 var scaleX = d3.scaleLinear(),
