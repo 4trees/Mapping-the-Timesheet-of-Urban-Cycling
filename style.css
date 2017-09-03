@@ -44,7 +44,10 @@ svg {
     fill: #0c1c21;
     opacity: .7;
 }
-
+.locateMe{
+    stroke:red !important;
+    stroke-width:1px !important;
+}
 .hidden {
     display: none;
     visibility: none;
@@ -76,7 +79,16 @@ svg {
     font-size: 12px;
     padding: 25px 20px;
 }
-
+#description input{
+    background: none;
+    border: 1px solid #93bc8e;
+    border-radius: 2px;
+    width: 50px;
+    color:#93bc8e;
+}
+#description input:focus{
+    outline:none;
+}
 #description p {
     width: 100%;
 }
@@ -92,20 +104,46 @@ svg {
 }
 
 
-/*.custom-tooltip {
-    position: absolute;
-    width: 180px;
-    min-height: 50px;
-    padding: 10px 5px;
-    background: white;
-    box-shadow: 0 2px 2px 0px rgba(0, 0, 0, .1);
+#cover {
+    z-index: 100;
+    position: fixed;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
 }
-*/
 
+#cover img {
+    width: 100%;
+    height: 100%;
+}
 
-/*.custom-tooltip .title {
-    font-size: 1.2em;
-    font-weight: bold;
-}*/
+#cover p {
+    z-index: 200;
+    position: fixed;
+    top: 20%;
+    text-align: center;
+    width: 100%;
+    color: #93bc8e;
+    font-size: 24px;
+    line-height: 140%;
+}
+
+#cover div {
+    width: 100%;
+    text-align: center;
+    z-index: 200;
+    position: fixed;
+    top: 50%;
+}
+#cover div img{
+    width: 20px;
+    height:auto;
+}
+#cover div a {
+    border: none;
+    background: none;
+    color: #93bc8e;
+    font-size: 16px;
+    cursor: pointer;
+}

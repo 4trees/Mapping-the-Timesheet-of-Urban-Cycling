@@ -15,11 +15,16 @@
                 <br>by cycling</div>
             <div id="description">
                 <p><span class="number" id="people"></span> people in Boston burned <span class="number" id="calories"></span>calories by cycling, saving <span class="number" id="co2"></span> CO<sub>2</sub> emissions.</p>
-                <p><span class="strong">I</span> cylced <span></span> min today, burned <span class="number" id="myCalories"></span> calories and saving <span class="number" id="myCO2"></span> CO<sub>2</sub> emissions.</p>
+                <p><span class="strong">I</span> cylced <span><input type="number" name="myCycle" min="5" max="120" step="1" value="0" onchange="locateMe(this.value)"></span> min today, burned <span class="number" id="myCalories">0</span> calories and saving <span class="number" id="myCO2">0</span> CO<sub>2</sub> emissions.</p>
             </div>
         </div>
         <section class="canvas" id="canvas">
         </section>
+        <div id="cover">
+            <img src="img/cover.png">
+            <p>Instead of driving a car, you can burn your own 'fuel' by cycling, <br>and in this way, no more greenhouse gas emission.</p>
+            <div><img src="img/arrow.svg"><br><a onclick="removeCover()">Explore the Data</a></div>
+        </div>
     </div>
     <script src="d3.js"></script>
     <script src="script.js"></script>

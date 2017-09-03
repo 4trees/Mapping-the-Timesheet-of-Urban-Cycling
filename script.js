@@ -58,7 +58,7 @@ nowDay.append('rect').attr('transform', `translate(1,${dayH + 25})`)
 
 var oneDay = nowDay.append('g').attr('class', 'oneday')
 nowDay.append('g').attr('class', 'axis axis-x')
-    
+
 
 var seasonPoint = [
     { name: 'spring', range: [3, 4, 5], color: '#b3ab23', order: 1 },
@@ -79,6 +79,10 @@ var seasonPoint = [
 // ]
 var durations = d3.set();
 var people, duration;
+
+function removeCover() {
+    d3.select('#cover').classed('hidden', true)
+}
 
 d3.queue()
     .defer(d3.csv, file, parse)
@@ -120,25 +124,25 @@ function dataloaded(err, trips) {
     allPeopleYear.splice(1, 0, mid)
     scaleColor.domain(allPeopleYear)
 
-    var days = svg.append('g').selectAll('.days').data(tripsBynest).enter()
+    var days = svg.append('g').selectAll('.days').data(tripsBynest)
+    var enterdays = days.enter()
         .append('g').attr('class', 'days')
-        .attr('transform', d => `translate(${scaleX(new Date(d.key))},${dayH})`)
-    days.selectAll('.circle').data(d => d.values).enter()
+
+    enterdays.selectAll('.circle').data(d => d.values).enter()
         .append('circle').attr('r', d => scaleR(d.value.sum))
-        //     .attr('cx', d => scaleX(d.values[0].start_day))
-        .attr('cy', d => scaleY(d.value.data[0].start_hour))
         .style('fill', d => scaleColor(d.value.people))
         .style('fill-opacity', .4)
         .style('stroke', d => scaleColor(d.value.people))
         .style('stroke-width', .5)
-
-    days.append('rect')
+        .attr('cy', d => scaleY(d.value.data[0].start_hour))
+    days.merge(enterdays).transition().duration(2000).attr('transform', d => `translate(${scaleX(new Date(d.key))},${dayH})`)
+    enterdays.append('rect')
         .style('fill', '#748e76')
         .attr('y', d => (30 - scaleDayY(d3.sum(d.values, e => e.value.sum))) / 2)
         .attr('width', 1)
         .attr('height', d => scaleDayY(d3.sum(d.values, e => e.value.sum)))
 
-    days.append('rect')
+    enterdays.append('rect')
         .attr('class', 'sticker')
         .attr('id', d => `id${Date.parse(d.key)}`)
         .style('fill', '#748e76')
@@ -146,8 +150,8 @@ function dataloaded(err, trips) {
         .attr('width', 1)
         .attr('height', 0)
 
-    days.append('rect')
-        // .style('fill', 'blue')
+    enterdays.append('rect')
+        .attr('class', d => `class${Date.parse(d.key)}`)
         .attr('x', -1.5)
         .style('opacity', 0)
         .attr('width', 3)
@@ -157,9 +161,7 @@ function dataloaded(err, trips) {
             prepareDay(new Date(d.key))
             drawDay(new Date(d.key), d.values)
         })
-        .on('mouseleave', d => {
-            // resetDay()
-        })
+
 
     // //Draw axis
     // svg.append('g').attr('class', 'axis axis-x')
@@ -228,13 +230,13 @@ function drawDay(nowDayDate, data) {
     console.log(data)
     const realPosition = scaleX(nowDayDate)
     let fixedPosition
-    if((realPosition + oneW) > svgW){
+    if ((realPosition + oneW) > svgW) {
         fixedPosition = oneW
         scaleoneX.range([oneW - 10, 5])
-    }else{
+    } else {
         fixedPosition = 0
         scaleoneX.range([5, oneW - 10])
-    }    
+    }
 
     const onedayData = data.map(d => { return { hour: +d.key, data: d3.nest().key(d => d.duration).entries(d.value.data) } })
     console.log(onedayData)
@@ -266,6 +268,8 @@ function drawDay(nowDayDate, data) {
         .attr('cx', fixedPosition)
         .style('stroke-width', .5)
         .style('fill-opacity', .2)
+        .attr('id', d => `id${d.key}${d.values[0].start_hour}`)
+        .on('mouseover', d => console.log(d))
 
 
     updateOnehour.merge(enterOnehour).attr('transform', d => `translate(0,${scaleY(d.hour) + dayH})`)
@@ -281,10 +285,24 @@ function drawDay(nowDayDate, data) {
         .attr('cx', d => scaleoneX(+d.key))
         .duration(2000)
 
-    // .delay(2002)
-    // .on('transitionend',() => d3.select(this).remove())
+}
 
+function locateMe(min) {
+    d3.select('.locateMe').classed('locateMe',false)
 
+    if (min * 60 < 300) { min = 5 }
+    if (min * 60 > 7200) { min = 120 }
+
+    document.querySelector('input[name="myCycle"]').value = min
+    let duration = min * 60;
+    let nowHour = new Date().getHours()
+    d3.select(`.class${Date.parse(testDay)}`).dispatch('mouseover')
+    let findCircle = d3.select(`#id${duration}${nowHour}`)
+    if(findCircle.node()){
+        console.log(findCircle.node())
+        findCircle.classed('locateMe',true)
+        findCircle.node().parentNode.appendChild(findCircle.node())
+    }
 
 }
 
@@ -295,7 +313,7 @@ function parse(d) {
     var day = new Date(refDate.setHours(0, 0, 0))
     // var mon = date.getMonth() + 1
     // var seasons = seasonPoint.find(e => e.range.includes(mon))
-    if (+d.tripduration > 3600 || +d.tripduration < 300) return
+    if (+d.tripduration > 7200 || +d.tripduration < 300) return
     return {
         start_at: date,
         start_hour: date.getHours(),
