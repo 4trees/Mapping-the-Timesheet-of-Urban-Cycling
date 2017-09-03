@@ -22,8 +22,13 @@
         </section>
         <div id="cover">
             <img src="img/cover.png">
-            <p>Instead of driving a car, you can burn your own 'fuel' by cycling, <br>and in this way, no more greenhouse gas emission.</p>
-            <div><img src="img/arrow.svg"><br><a onclick="removeCover()">Explore the Data</a></div>
+            <div class="typewriter">
+                <p>Instead of driving a car, you can burn your own 'fuel' by cycling, </p>
+                <p>and in this way, no more greenhouse gas emission.</p>
+            </div>
+            <div class="loading"><p>Loading...</p></div>
+            <div id="explore" class="hidden"><img src="img/arrow.svg">
+                <br><a onclick="removeCover()">Explore the Data</a></div>
         </div>
     </div>
     <script src="d3.js"></script>

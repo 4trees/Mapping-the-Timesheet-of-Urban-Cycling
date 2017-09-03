@@ -44,10 +44,7 @@ svg {
     fill: #0c1c21;
     opacity: .7;
 }
-.locateMe{
-    stroke:red !important;
-    stroke-width:1px !important;
-}
+
 .hidden {
     display: none;
     visibility: none;
@@ -79,16 +76,19 @@ svg {
     font-size: 12px;
     padding: 25px 20px;
 }
-#description input{
+
+#description input {
     background: none;
     border: 1px solid #93bc8e;
     border-radius: 2px;
     width: 50px;
-    color:#93bc8e;
+    color: #93bc8e;
 }
-#description input:focus{
-    outline:none;
+
+#description input:focus {
+    outline: none;
 }
+
 #description p {
     width: 100%;
 }
@@ -118,32 +118,65 @@ svg {
     height: 100%;
 }
 
-#cover p {
+#cover .typewriter {
     z-index: 200;
     position: fixed;
-    top: 20%;
+    top: 25%;
     text-align: center;
     width: 100%;
-    color: #93bc8e;
-    font-size: 24px;
-    line-height: 140%;
 }
 
-#cover div {
+#cover #explore,
+#cover .loading {
     width: 100%;
     text-align: center;
     z-index: 200;
     position: fixed;
-    top: 50%;
 }
-#cover div img{
+
+#cover #explore {
+    top: 65%;
+}
+
+#cover .loading {
+    top: 65%;
+    color: #afaeae;
+    font-size: 16px;
+
+}
+
+#cover div img {
     width: 20px;
-    height:auto;
+    height: auto;
 }
+
 #cover div a {
     border: none;
     background: none;
     color: #93bc8e;
     font-size: 16px;
     cursor: pointer;
+}
+
+.typewriter p {
+    width: 100%;
+    color: #93bc8e;
+    font-size: 24px;
+    line-height: 140%;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+
+
+.loading {
+    animation: blink 1s infinite;
+}
+
+
+
+@keyframes blink {
+    to {
+        opacity: .0;
+    }
 }

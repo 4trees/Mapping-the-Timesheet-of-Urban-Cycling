@@ -171,7 +171,8 @@ function dataloaded(err, trips) {
         .attr('transform', `translate(35,${dayH})`)
         .call(axisY);
 
-
+    d3.select('#explore').classed('hidden',false)
+    d3.select('.loading').classed('hidden',true)
 }
 
 function resetDay() {
@@ -203,13 +204,25 @@ function prepareDay(nowDayDate) {
 }
 
 function fillNumber(people, duration) {
+    let numbers = getNumber(duration);
+
+    document.querySelector('#people').innerHTML = people.toLocaleString();
+    document.querySelector('#calories').innerHTML = `${Math.floor(numbers[0]).toLocaleString()} ${numbers[1]}`;
+    document.querySelector('#co2').innerHTML = `${Math.floor(numbers[2]).toLocaleString()} ${numbers[3]}`;
+
+}
+function getNumber(duration){
     const calories = duration * 204 / 3600;
     const co2 = duration / 2400 * 9.3 * 411 / 1000;
     let unitCo2, fixedCo2, unitCal, fixedCal;
     if (co2 > 10000) {
         unitCo2 = 'tons';
         fixedCo2 = co2 / 1000;
-    } else {
+    } else if(co2 < 1){
+        unitCo2 = 'g'
+        fixedCo2 = co2 * 1000;
+    }
+    else {
         unitCo2 = 'kg'
         fixedCo2 = co2;
     }
@@ -220,10 +233,12 @@ function fillNumber(people, duration) {
         unitCal = ''
         fixedCal = calories;
     }
-    document.querySelector('#people').innerHTML = people.toLocaleString();
-    document.querySelector('#calories').innerHTML = `${Math.floor(fixedCal).toLocaleString()} ${unitCal}`;
-    document.querySelector('#co2').innerHTML = `${Math.floor(fixedCo2).toLocaleString()} ${unitCo2}`;
-
+    return [fixedCal,unitCal,fixedCo2,unitCo2]
+}
+function fillMe(duration){
+    let numbers = getNumber(duration);
+    document.querySelector('#myCalories').innerHTML = `${Math.floor(numbers[0]).toLocaleString()} ${numbers[1]}`
+    document.querySelector('#myCO2').innerHTML = `${Math.floor(numbers[2]).toLocaleString()} ${numbers[3]}`
 }
 
 function drawDay(nowDayDate, data) {
@@ -297,13 +312,8 @@ function locateMe(min) {
     let duration = min * 60;
     let nowHour = new Date().getHours()
     d3.select(`.class${Date.parse(testDay)}`).dispatch('mouseover')
-    let findCircle = d3.select(`#id${duration}${nowHour}`)
-    if(findCircle.node()){
-        console.log(findCircle.node())
-        findCircle.classed('locateMe',true)
-        findCircle.node().parentNode.appendChild(findCircle.node())
-    }
 
+    fillMe(duration)
 }
 
 
