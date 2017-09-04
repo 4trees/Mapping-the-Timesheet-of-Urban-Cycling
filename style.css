@@ -17,11 +17,12 @@ body,
 }
 
 .canvas {
-    width: 98%;
+    width: 100%;
+    margin: 0;
 }
 
 svg {
-    width: 100%;
+    /*width: 100%;*/
 }
 
 .nowDay,
@@ -57,10 +58,14 @@ svg {
 .axis text {
     fill: #acacac;
 }
-
+.axisLable{
+    fill:#acacac;
+    font-size: 10px;
+}
 #titleContainer {
     width: 100%;
     display: flex;
+    height: 20%;
 }
 
 .title {
@@ -109,13 +114,18 @@ svg {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 98%;
     height: 100%;
+    background: #0c1c21;
 }
 
-#cover img {
-    width: 100%;
-    height: 100%;
+#cover .background {
+    width: 90%;
+    height: 75%;
+    left: 5%;
+    top: 20%;
+    z-index: 101;
+    position: fixed;
 }
 
 #cover .typewriter {
@@ -142,7 +152,6 @@ svg {
     top: 65%;
     color: #afaeae;
     font-size: 16px;
-
 }
 
 #cover div img {
@@ -156,6 +165,7 @@ svg {
     color: #93bc8e;
     font-size: 16px;
     cursor: pointer;
+    margin-bottom: 5px;
 }
 
 .typewriter p {
@@ -170,13 +180,13 @@ svg {
 
 
 .loading {
-    animation: blink 1s infinite;
+    animation: blink 1.5s infinite;
 }
 
 
 
 @keyframes blink {
     to {
-        opacity: .0;
+        opacity: .1;
     }
 }

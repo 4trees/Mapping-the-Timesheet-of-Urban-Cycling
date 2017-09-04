@@ -36,7 +36,7 @@ var testDay = new Date(new Date(new Date().setHours(0, 0, 0)).setYear(2016));
 
 
 var svgH = h * .75,
-    svgW = w - 30;
+    svgW = w * .95;
 
 var oneH = svgH * .9,
     oneW = svgW * .45;
@@ -44,7 +44,7 @@ var dayH = 20
 
 var svg = d3.select('#canvas')
     .append('svg')
-    .attr('transform', `translate(15, 0)`)
+    .attr('transform', `translate(${w * .05 / 2}, 0)`)
     .attr('width', svgW).attr('height', svgH)
 
 
@@ -111,8 +111,8 @@ function dataloaded(err, trips) {
     const allDayinYear = d3.extent(tripsBynest, d => new Date(d.key))
     const allDurationinYear = d3.extent(tripsBynest.map(d => d.values.map(e => e.value.sum)).reduce((a, b) => a.concat(b)))
     const durationByDay = d3.extent(tripsBynest.map(d => d3.sum(d.values, e => e.value.sum)))
-    console.log(durationByDay)
-    scaleX.domain(allDayinYear).range([40, svgW - 20])
+
+    scaleX.domain(allDayinYear).range([w * .1 / 2, svgW * .99])
     scaleY.domain(d3.extent(trips, d => d.start_hour)).range([oneH, dayH * 2])
     scaleR.domain(allDurationinYear)
     scaleoneX.domain(d3.extent(trips, d => d.duration))
@@ -145,7 +145,7 @@ function dataloaded(err, trips) {
     enterdays.append('rect')
         .attr('class', 'sticker')
         .attr('id', d => `id${Date.parse(d.key)}`)
-        .style('fill', '#748e76')
+        .style('fill', '#d3e0d1')
         .attr('y', d => (30 - scaleDayY(d3.sum(d.values, e => e.value.sum))) / 2)
         .attr('width', 1)
         .attr('height', 0)
@@ -156,23 +156,31 @@ function dataloaded(err, trips) {
         .style('opacity', 0)
         .attr('width', 3)
         .attr('height', 30)
+        .style('cursor', 'pointer')
         .on('mouseover', d => {
 
             prepareDay(new Date(d.key))
             drawDay(new Date(d.key), d.values)
         })
 
+    let lable = svg.append('text')
+        .attr('class', 'axisLable')
+        .attr('transform', `translate(${w * .09 / 2 / 2},${dayH})`)
+        .html(`<tspan x=0 dy=10 >daily</tspan><tspan x=0 dy=10 >sum</tspan>`)
+    // lable.append('tspan').text('Daily')
+
+    // lable.append('tspan').text('sum')
 
     // //Draw axis
     // svg.append('g').attr('class', 'axis axis-x')
     //     .attr('transform', `translate(0,${dayH})`)
     //     .call(axisX);
     svg.append('g').attr('class', 'axis axis-y')
-        .attr('transform', `translate(35,${dayH})`)
+        .attr('transform', `translate(${w * .09 / 2},${dayH})`)
         .call(axisY);
 
-    d3.select('#explore').classed('hidden',false)
-    d3.select('.loading').classed('hidden',true)
+    d3.select('#explore').classed('hidden', false)
+    d3.select('.loading').classed('hidden', true)
 }
 
 function resetDay() {
@@ -184,7 +192,7 @@ function resetDay() {
 function prepareDay(nowDayDate) {
     resetDay();
 
-    svg.select(`#id${Date.parse(nowDayDate)}`).attr('height', oneH + 10).style('fill', '#93bc8e')
+    svg.select(`#id${Date.parse(nowDayDate)}`).attr('height', oneH + 10).style('fill', '#d3e0d1')
 
     nowDay.classed('hidden', false)
     const realPosition = scaleX(nowDayDate)
@@ -197,7 +205,7 @@ function prepareDay(nowDayDate) {
     // nowDay.select('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', oneH + 10)
     nowDay.select('text').text(`${+nowDayArray[1]} ${nowDayArray[2]}`)
         .attr('x', (realPosition + oneW) < svgW ? 0 : oneW)
-        .attr('y', 20)
+        .attr('y', 15)
     nowDay.node().parentNode.appendChild(nowDay.node())
 
 
@@ -211,18 +219,18 @@ function fillNumber(people, duration) {
     document.querySelector('#co2').innerHTML = `${Math.floor(numbers[2]).toLocaleString()} ${numbers[3]}`;
 
 }
-function getNumber(duration){
+
+function getNumber(duration) {
     const calories = duration * 204 / 3600;
     const co2 = duration / 2400 * 9.3 * 411 / 1000;
     let unitCo2, fixedCo2, unitCal, fixedCal;
     if (co2 > 10000) {
         unitCo2 = 'tons';
         fixedCo2 = co2 / 1000;
-    } else if(co2 < 1){
+    } else if (co2 < 1) {
         unitCo2 = 'g'
         fixedCo2 = co2 * 1000;
-    }
-    else {
+    } else {
         unitCo2 = 'kg'
         fixedCo2 = co2;
     }
@@ -233,9 +241,10 @@ function getNumber(duration){
         unitCal = ''
         fixedCal = calories;
     }
-    return [fixedCal,unitCal,fixedCo2,unitCo2]
+    return [fixedCal, unitCal, fixedCo2, unitCo2]
 }
-function fillMe(duration){
+
+function fillMe(duration) {
     let numbers = getNumber(duration);
     document.querySelector('#myCalories').innerHTML = `${Math.floor(numbers[0]).toLocaleString()} ${numbers[1]}`
     document.querySelector('#myCO2').innerHTML = `${Math.floor(numbers[2]).toLocaleString()} ${numbers[3]}`
@@ -303,7 +312,7 @@ function drawDay(nowDayDate, data) {
 }
 
 function locateMe(min) {
-    d3.select('.locateMe').classed('locateMe',false)
+    d3.select('.locateMe').classed('locateMe', false)
 
     if (min * 60 < 300) { min = 5 }
     if (min * 60 > 7200) { min = 120 }
