@@ -40,7 +40,7 @@ var svgH = h * .75,
 
 var oneH = svgH * .9,
     oneW = svgW * .45;
-var dayH = 20
+var dayH = svgH * .04;
 
 var svg = d3.select('#canvas')
     .append('svg')
@@ -51,7 +51,8 @@ var svg = d3.select('#canvas')
 var nowDay = svg.append('g').attr('class', 'nowDay hidden')
 // nowDay.append('line')
 // .attr('transform', `translate(0,${dayH + 25})`)
-nowDay.append('text')
+nowDay.append('text').attr('class', 'dayName')
+nowDay.append('text').attr('class', 'dayTitle').text('Time distribution of each cyclying duration')
 // .attr('transform', `translate(0,${dayH + 25})`)
 nowDay.append('rect').attr('transform', `translate(1,${dayH + 25})`)
     .attr('width', oneW).attr('height', oneH)
@@ -90,6 +91,7 @@ d3.queue()
 
 function dataloaded(err, trips) {
     console.log(trips)
+
     people = trips.length;
     duration = d3.sum(trips, d => d.duration)
     fillNumber(people, duration)
@@ -112,7 +114,7 @@ function dataloaded(err, trips) {
     const allDurationinYear = d3.extent(tripsBynest.map(d => d.values.map(e => e.value.sum)).reduce((a, b) => a.concat(b)))
     const durationByDay = d3.extent(tripsBynest.map(d => d3.sum(d.values, e => e.value.sum)))
 
-    scaleX.domain(allDayinYear).range([w * .1 / 2, svgW * .99])
+    scaleX.domain(allDayinYear).range([w * .1 / 2, w * .93])
     scaleY.domain(d3.extent(trips, d => d.start_hour)).range([oneH, dayH * 2])
     scaleR.domain(allDurationinYear)
     scaleoneX.domain(d3.extent(trips, d => d.duration))
@@ -127,6 +129,8 @@ function dataloaded(err, trips) {
     var days = svg.append('g').selectAll('.days').data(tripsBynest)
     var enterdays = days.enter()
         .append('g').attr('class', 'days')
+        .attr('id', d => `dayGroup${Date.parse(d.key)}`)
+        .attr('transform', d => `translate(${scaleX(new Date(d.key))},${dayH})`)
 
     enterdays.selectAll('.circle').data(d => d.values).enter()
         .append('circle').attr('r', d => scaleR(d.value.sum))
@@ -135,7 +139,10 @@ function dataloaded(err, trips) {
         .style('stroke', d => scaleColor(d.value.people))
         .style('stroke-width', .5)
         .attr('cy', d => scaleY(d.value.data[0].start_hour))
-    days.merge(enterdays).transition().duration(2000).attr('transform', d => `translate(${scaleX(new Date(d.key))},${dayH})`)
+
+    // days.merge(enterdays)
+        // .transition().duration(2000)
+        // .attr('transform', d => `translate(${scaleX(new Date(d.key))},${dayH})`)
     enterdays.append('rect')
         .style('fill', '#748e76')
         .attr('y', d => (30 - scaleDayY(d3.sum(d.values, e => e.value.sum))) / 2)
@@ -186,11 +193,14 @@ function dataloaded(err, trips) {
 function resetDay() {
 
     svg.selectAll('.sticker').style('fill', '#748e76').attr('height', 0)
+    svg.selectAll('.selected').classed('selected', false)
 
 }
 
 function prepareDay(nowDayDate) {
     resetDay();
+    svg.select(`#dayGroup${Date.parse(nowDayDate)}`).selectAll('circle').classed('selected', true)
+    console.log(`#dayGroup${Date.parse(nowDayDate)}`)
 
     svg.select(`#id${Date.parse(nowDayDate)}`).attr('height', oneH + 10).style('fill', '#d3e0d1')
 
@@ -203,9 +213,12 @@ function prepareDay(nowDayDate) {
     nowDay.selectAll('.onecircle').remove()
 
     // nowDay.select('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', oneH + 10)
-    nowDay.select('text').text(`${+nowDayArray[1]} ${nowDayArray[2]}`)
+    nowDay.select('.dayName').text(`${+nowDayArray[1]} ${nowDayArray[2]}`)
         .attr('x', (realPosition + oneW) < svgW ? 0 : oneW)
         .attr('y', 15)
+    nowDay.select('.dayTitle')
+        .attr('x', oneW / 2)
+        .attr('y', oneH * 2)
     nowDay.node().parentNode.appendChild(nowDay.node())
 
 
@@ -251,7 +264,6 @@ function fillMe(duration) {
 }
 
 function drawDay(nowDayDate, data) {
-    console.log(data)
     const realPosition = scaleX(nowDayDate)
     let fixedPosition
     if ((realPosition + oneW) > svgW) {
@@ -261,9 +273,8 @@ function drawDay(nowDayDate, data) {
         fixedPosition = 0
         scaleoneX.range([5, oneW - 10])
     }
-
     const onedayData = data.map(d => { return { hour: +d.key, data: d3.nest().key(d => d.duration).entries(d.value.data) } })
-    console.log(onedayData)
+
     const nowPeople = d3.sum(data, d => d.value.people)
     const nowDuration = d3.sum(data, d => d.value.sum)
     fillNumber(nowPeople, nowDuration)

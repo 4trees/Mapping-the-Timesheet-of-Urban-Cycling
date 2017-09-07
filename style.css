@@ -34,13 +34,17 @@ svg {
     stroke-width: 1;
     stroke: #666;
 }
-
-.nowDay text {
-    fill: #93bc8e;
-    font-size: 10px;
+.nowDay text{
     text-anchor: middle;
 }
-
+.nowDay .dayName {
+    fill: #93bc8e;
+    font-size: 10px;
+}
+.nowDay .dayTitle {
+    fill: #d3e0d1;
+    font-size: 10px;
+}
 .nowDay rect {
     fill: #0c1c21;
     opacity: .7;
@@ -50,7 +54,10 @@ svg {
     display: none;
     visibility: none;
 }
-
+.selected{
+    stroke:#d3e0d1 !important;
+    stroke-width:1px !important;
+}
 .axis path {
     opacity: 0;
 }
@@ -120,10 +127,10 @@ svg {
 }
 
 #cover .background {
-    width: 90%;
-    height: 75%;
-    left: 5%;
-    top: 20%;
+    width: 87.5%;
+    height: 125%;
+    left: 7.5%;
+    top: 2.5%;
     z-index: 101;
     position: fixed;
 }
