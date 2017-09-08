@@ -8,13 +8,7 @@ var scaleX = d3.scaleLinear(),
     scaleoneX = d3.scaleLinear(),
     scaleDayY = d3.scaleLinear(),
     scaleColor = d3.scaleLinear()
-    // .range(['#4e6a42','#b3ab23','#c77961'])
-    // .range(['#b3ab23','#4e6a42','#ad492c'])
-    // .range(['#9ec06b','#4e6a42','#ad492c'])
-    // .range(['#9ec06b','#b3ab23','#ad492c'])
-    .range(['#d9e021', '#5b600f', '#ad492c'])
-// .range(['#d9e021', '#747a2f', '#7a412f'])
-;
+    .range(['#d9e021', '#5b600f', '#ad492c']);
 //Axis
 // var axisX = d3.axisTop()
 //     .scale(scaleX)
@@ -33,12 +27,16 @@ var axisSmallX = d3.axisBottom()
     .tickFormat(d => `${Math.floor(d / 60)}min`);
 
 var testDay = new Date(new Date(new Date().setHours(0, 0, 0)).setYear(2016));
-
+var nowPeople, nowDuration, nowDate;
+var people = 1064053,
+    duration = 992909031,
+    date = 'one year';
+var isOpen = false;
 
 var svgH = h * .75,
     svgW = w * .95;
 
-var oneH = svgH * .9,
+var oneH = svgH * .85,
     oneW = svgW * .45;
 var dayH = svgH * .04;
 
@@ -48,17 +46,21 @@ var svg = d3.select('#canvas')
     .attr('width', svgW).attr('height', svgH)
 
 
-var nowDay = svg.append('g').attr('class', 'nowDay hidden')
+var nowDay = svg.append('g').attr('class', 'nowDay')
 // nowDay.append('line')
 // .attr('transform', `translate(0,${dayH + 25})`)
-nowDay.append('text').attr('class', 'dayName')
-nowDay.append('text').attr('class', 'dayTitle').text('Time distribution of each cyclying duration')
-// .attr('transform', `translate(0,${dayH + 25})`)
-nowDay.append('rect').attr('transform', `translate(1,${dayH + 25})`)
+var nowDayName = nowDay.append('g')
+nowDayName.append('text').attr('class', 'dayName')
+var nowDayContent = nowDay.append('g').attr('class', 'hidden')
+nowDayContent.append('text').attr('class', 'dayName dayNameInTable')
+let nowDayTable = nowDayContent.append('g')
+nowDayTable.append('rect').attr('transform', `translate(1,${dayH * 2 + 25})`)
     .attr('width', oneW).attr('height', oneH)
+nowDayTable.append('text').attr('class', 'dayTitle').text('Minutes distribution in one day')
+    .attr('transform', `translate(0,${dayH})`)
 
-var oneDay = nowDay.append('g').attr('class', 'oneday')
-nowDay.append('g').attr('class', 'axis axis-x')
+var oneDay = nowDayTable.append('g').attr('class', 'oneday')
+nowDayTable.append('g').attr('class', 'axis axis-x')
 
 
 var seasonPoint = [
@@ -69,17 +71,8 @@ var seasonPoint = [
 ]
 
 
-// var dayPoint = [
-//     { name: 'sunday', order: 1 },
-//     { name: 'monday', order: 2 },
-//     { name: 'tuesday', order: 3 },
-//     { name: 'wednesday', order: 4 },
-//     { name: 'thursday', order: 5 },
-//     { name: 'friday', order: 6 },
-//     { name: 'saturday', order: 7 },
-// ]
-var durations = d3.set();
-var people, duration;
+// var durations = d3.set();
+
 
 function removeCover() {
     d3.select('#cover').classed('hidden', true)
@@ -94,13 +87,7 @@ function dataloaded(err, trips) {
 
     people = trips.length;
     duration = d3.sum(trips, d => d.duration)
-    fillNumber(people, duration)
-    svg.on('mouseleave', e => {
-        nowDay.classed('hidden', true)
-        resetDay()
-        fillNumber(people, duration)
-    })
-
+    fillNumber(people, duration, date)
 
     var tripsBynest = d3.nest()
         .key(d => d.start_day)
@@ -115,7 +102,7 @@ function dataloaded(err, trips) {
     const durationByDay = d3.extent(tripsBynest.map(d => d3.sum(d.values, e => e.value.sum)))
 
     scaleX.domain(allDayinYear).range([w * .1 / 2, w * .93])
-    scaleY.domain(d3.extent(trips, d => d.start_hour)).range([oneH, dayH * 2])
+    scaleY.domain(d3.extent(trips, d => d.start_hour)).range([oneH + dayH, dayH * 3])
     scaleR.domain(allDurationinYear)
     scaleoneX.domain(d3.extent(trips, d => d.duration))
 
@@ -140,11 +127,9 @@ function dataloaded(err, trips) {
         .style('stroke-width', .5)
         .attr('cy', d => scaleY(d.value.data[0].start_hour))
 
-    // days.merge(enterdays)
-        // .transition().duration(2000)
-        // .attr('transform', d => `translate(${scaleX(new Date(d.key))},${dayH})`)
     enterdays.append('rect')
         .style('fill', '#748e76')
+        .attr('class', d => `daily daily${Date.parse(d.key)}`)
         .attr('y', d => (30 - scaleDayY(d3.sum(d.values, e => e.value.sum))) / 2)
         .attr('width', 1)
         .attr('height', d => scaleDayY(d3.sum(d.values, e => e.value.sum)))
@@ -165,15 +150,31 @@ function dataloaded(err, trips) {
         .attr('height', 30)
         .style('cursor', 'pointer')
         .on('mouseover', d => {
+            showDayName(new Date(d.key), nowDayName)
 
+            nowPeople = d3.sum(d.values, e => e.value.people)
+            nowDuration = d3.sum(d.values, e => e.value.sum)
+
+            fillNumber(nowPeople, nowDuration, `one day on ${nowDate}`)
+        })
+        // .on('mouseleave', d => {
+        //     if (isOpen) {
+        //         fillNumber(nowPeople, nowDuration)
+        //         console.log(nowPeople, nowDuration)
+        //     }
+
+        // })
+
+        .on('click', d => {
+            isOpen = true;
             prepareDay(new Date(d.key))
             drawDay(new Date(d.key), d.values)
         })
 
     let lable = svg.append('text')
         .attr('class', 'axisLable')
-        .attr('transform', `translate(${w * .09 / 2 / 2},${dayH})`)
-        .html(`<tspan x=0 dy=10 >daily</tspan><tspan x=0 dy=10 >sum</tspan>`)
+        .attr('transform', `translate(${w * .09 / 2 - 2},${dayH})`)
+        .html(`<tspan x=0 dy=10 >Mins</tspan><tspan x=0 dy=10 >per day</tspan>`)
     // lable.append('tspan').text('Daily')
 
     // lable.append('tspan').text('sum')
@@ -186,8 +187,11 @@ function dataloaded(err, trips) {
         .attr('transform', `translate(${w * .09 / 2},${dayH})`)
         .call(axisY);
 
-    d3.select('#explore').classed('hidden', false)
-    d3.select('.loading').classed('hidden', true)
+    let cover = d3.select('#cover')
+    cover.select('.loading').classed('hidden', true)
+    cover.select('#explore').classed('hidden', false)
+    cover.on('click', d => removeCover()).style('cursor', 'pointer')
+
 }
 
 function resetDay() {
@@ -197,73 +201,76 @@ function resetDay() {
 
 }
 
-function prepareDay(nowDayDate) {
-    resetDay();
-    svg.select(`#dayGroup${Date.parse(nowDayDate)}`).selectAll('circle').classed('selected', true)
-    console.log(`#dayGroup${Date.parse(nowDayDate)}`)
-
-    svg.select(`#id${Date.parse(nowDayDate)}`).attr('height', oneH + 10).style('fill', '#d3e0d1')
-
-    nowDay.classed('hidden', false)
-    const realPosition = scaleX(nowDayDate)
-    const fixedPosition = (realPosition + oneW) > svgW ? (realPosition - oneW - 1) : realPosition
-
-    var nowDayArray = nowDayDate.toUTCString().split(' ')
-    nowDay.attr('transform', `translate(${fixedPosition},0)`)
-    nowDay.selectAll('.onecircle').remove()
-
-    // nowDay.select('line').attr('x1', 0).attr('y1', 0).attr('x2', 0).attr('y2', oneH + 10)
-    nowDay.select('.dayName').text(`${+nowDayArray[1]} ${nowDayArray[2]}`)
-        .attr('x', (realPosition + oneW) < svgW ? 0 : oneW)
-        .attr('y', 15)
-    nowDay.select('.dayTitle')
-        .attr('x', oneW / 2)
-        .attr('y', oneH * 2)
-    nowDay.node().parentNode.appendChild(nowDay.node())
-
+function resetAll() {
+    resetDay()
+    svg.selectAll('.daily').style('fill', '#748e76')
+    nowDayName.select('text').text('')
+    nowDayContent.classed('hidden', true)
+    isOpen = false;
+    fillNumber(people, duration, date)
 
 }
 
-function fillNumber(people, duration) {
-    let numbers = getNumber(duration);
 
+function showDayName(nowDayDate, item) {
+    svg.selectAll('.daily').style('fill', '#748e76')
+    const nowDayArray = nowDayDate.toUTCString().split(' ')
+    const realPosition = scaleX(nowDayDate)
+    const fixedPosition = (realPosition + oneW) > svgW ? (realPosition - oneW - 1) : realPosition
+    nowDate = `${+nowDayArray[1]} ${nowDayArray[2]}`
+    item.select('.dayName').attr('transform', `translate(${fixedPosition},0)`)
+        .text(nowDate)
+        .attr('x', (realPosition + oneW) < svgW ? 0 : oneW)
+        .attr('y', 15)
+    svg.select(`.daily${Date.parse(nowDayDate)}`).style('fill', '#d3e0d1')
+}
+
+function prepareDay(nowDayDate) {
+    resetDay();
+    nowDayContent.classed('hidden', false)
+    svg.select(`#dayGroup${Date.parse(nowDayDate)}`).selectAll('circle').classed('selected', true)
+    // console.log(`#dayGroup${Date.parse(nowDayDate)}`)
+
+    svg.select(`#id${Date.parse(nowDayDate)}`).attr('height', oneH + dayH + 10).style('fill', '#d3e0d1')
+    const realPosition = scaleX(nowDayDate)
+    const fixedPosition = (realPosition + oneW) > svgW ? (realPosition - oneW - 1) : realPosition
+
+    nowDayTable.attr('transform', `translate(${fixedPosition},0)`)
+
+    showDayName(nowDayDate, nowDayContent)
+
+    nowDayContent.select('.dayTitle')
+        .attr('x', oneW / 2)
+        .attr('y', dayH * 2)
+    nowDay.node().parentNode.appendChild(nowDay.node())
+}
+
+function fillNumber(people, duration, date) {
+
+    let numbers = getNumber(duration);
+    document.querySelector('#date').innerHTML = date;
     document.querySelector('#people').innerHTML = people.toLocaleString();
-    document.querySelector('#calories').innerHTML = `${Math.floor(numbers[0]).toLocaleString()} ${numbers[1]}`;
-    document.querySelector('#co2').innerHTML = `${Math.floor(numbers[2]).toLocaleString()} ${numbers[3]}`;
+    document.querySelector('#duration').innerHTML = Math.floor(duration / 60).toLocaleString();
+    document.querySelector('#calories').innerHTML = Math.floor(numbers[0]).toLocaleString()
+    document.querySelector('#co2').innerHTML = Math.floor(numbers[1]).toLocaleString()
 
 }
 
 function getNumber(duration) {
     const calories = duration * 204 / 3600;
-    const co2 = duration / 2400 * 9.3 * 411 / 1000;
-    let unitCo2, fixedCo2, unitCal, fixedCal;
-    if (co2 > 10000) {
-        unitCo2 = 'tons';
-        fixedCo2 = co2 / 1000;
-    } else if (co2 < 1) {
-        unitCo2 = 'g'
-        fixedCo2 = co2 * 1000;
-    } else {
-        unitCo2 = 'kg'
-        fixedCo2 = co2;
-    }
-    if (calories > 100000) {
-        unitCal = 'k ';
-        fixedCal = calories / 1000;
-    } else {
-        unitCal = ''
-        fixedCal = calories;
-    }
-    return [fixedCal, unitCal, fixedCo2, unitCo2]
+    const co2 = duration / 2400 * 9.3 * 411;
+
+    return [calories, co2]
 }
 
 function fillMe(duration) {
     let numbers = getNumber(duration);
-    document.querySelector('#myCalories').innerHTML = `${Math.floor(numbers[0]).toLocaleString()} ${numbers[1]}`
-    document.querySelector('#myCO2').innerHTML = `${Math.floor(numbers[2]).toLocaleString()} ${numbers[3]}`
+    document.querySelector('#myCalories').innerHTML = Math.floor(numbers[0]).toLocaleString()
+    document.querySelector('#myCO2').innerHTML = Math.floor(numbers[1]).toLocaleString()
 }
 
 function drawDay(nowDayDate, data) {
+    oneDay.selectAll('.hours').remove()
     const realPosition = scaleX(nowDayDate)
     let fixedPosition
     if ((realPosition + oneW) > svgW) {
@@ -275,50 +282,54 @@ function drawDay(nowDayDate, data) {
     }
     const onedayData = data.map(d => { return { hour: +d.key, data: d3.nest().key(d => d.duration).entries(d.value.data) } })
 
-    const nowPeople = d3.sum(data, d => d.value.people)
-    const nowDuration = d3.sum(data, d => d.value.sum)
-    fillNumber(nowPeople, nowDuration)
+    nowPeople = d3.sum(data, d => d.value.people)
+    nowDuration = d3.sum(data, d => d.value.sum)
+    fillNumber(nowPeople, nowDuration, `one day on ${nowDate}`)
 
-    const allPeopleDay = d3.extent(onedayData.map(d => d.data.map(e => e.values.length)).reduce((a, b) => a.concat(b)))
+    // const allPeopleDay = d3.extent(onedayData.map(d => d.data.map(e => e.values.length)).reduce((a, b) => a.concat(b)))
 
-    const mid = (allPeopleDay[0] + allPeopleDay[1]) / 2
-    allPeopleDay.splice(1, 0, mid)
+    // const mid = (allPeopleDay[0] + allPeopleDay[1]) / 2
+    // allPeopleDay.splice(1, 0, mid)
 
-    scaleColor.domain(allPeopleDay)
-
+    // scaleColor.domain(allPeopleDay)
+    console.log(onedayData, data)
 
     var updateOnehour = oneDay.selectAll('.hours').data(onedayData, d => d.hour)
-    updateOnehour.exit().remove()
+
     var enterOnehour = updateOnehour.enter().append('g').attr('class', 'hours')
         .attr('transform', d => `translate(0,${scaleY(d.hour) + dayH})`)
-        .on('mouseover', d => console.log(d.hour))
+    // .on('mouseover', d => console.log(d.hour))
 
-    var updateOne = updateOnehour.selectAll('.onecircle')
+    var updateOne = enterOnehour.selectAll('.onecircle')
         // .attr('cx', (realPosition + oneW + 30) > svgW ? oneW : 0)
         .data(d => d.data)
-    updateOne.exit().remove()
+
     var enterOne = updateOne.enter().append('circle')
         .attr('class', 'onecircle')
         .attr('r', 1.5)
         .attr('cx', fixedPosition)
         .style('stroke-width', .5)
         .style('fill-opacity', .2)
+        .style('fill', '#afaeae')
+        .style('stroke', '#afaeae')
         .attr('id', d => `id${d.key}${d.values[0].start_hour}`)
-        .on('mouseover', d => console.log(d))
+    // .on('mouseover', d => console.log(d))
 
+    updateOnehour.exit().remove()
+    // updateOne.exit().remove()
 
     updateOnehour.merge(enterOnehour).attr('transform', d => `translate(0,${scaleY(d.hour) + dayH})`)
-    svg.select('.axis-x').attr('transform', d => `translate(0,${oneH + dayH + 10})`).call(axisSmallX);
 
     updateOne
         .merge(enterOne)
-
         .attr('cx', fixedPosition)
-        .style('fill', d => scaleColor(d.values.length))
-        .style('stroke', d => scaleColor(d.values.length))
-        .transition()
+        // .style('fill', d => scaleColor(d.values.length))
+        // .style('stroke', d => scaleColor(d.values.length))
+        .transition().duration(2000)
         .attr('cx', d => scaleoneX(+d.key))
-        .duration(2000)
+
+    svg.select('.axis-x').attr('transform', d => `translate(0,${oneH + dayH * 2 + 10})`).call(axisSmallX);
+
 
 }
 
@@ -331,7 +342,7 @@ function locateMe(min) {
     document.querySelector('input[name="myCycle"]').value = min
     let duration = min * 60;
     let nowHour = new Date().getHours()
-    d3.select(`.class${Date.parse(testDay)}`).dispatch('mouseover')
+    d3.select(`.class${Date.parse(testDay)}`).dispatch('click')
 
     fillMe(duration)
 }

@@ -34,17 +34,26 @@ svg {
     stroke-width: 1;
     stroke: #666;
 }
-.nowDay text{
+
+.nowDay text {
     text-anchor: middle;
 }
+
 .nowDay .dayName {
     fill: #93bc8e;
     font-size: 10px;
 }
+
+.dayNameInTable {
+    opacity: .4;
+    fill: #d3e0d1 !important;
+}
+
 .nowDay .dayTitle {
     fill: #d3e0d1;
     font-size: 10px;
 }
+
 .nowDay rect {
     fill: #0c1c21;
     opacity: .7;
@@ -54,10 +63,12 @@ svg {
     display: none;
     visibility: none;
 }
-.selected{
-    stroke:#d3e0d1 !important;
-    stroke-width:1px !important;
+
+.selected {
+    stroke: #d3e0d1 !important;
+    stroke-width: 1.5px !important;
 }
+
 .axis path {
     opacity: 0;
 }
@@ -65,10 +76,13 @@ svg {
 .axis text {
     fill: #acacac;
 }
-.axisLable{
-    fill:#acacac;
-    font-size: 10px;
+
+.axisLable {
+    fill: #acacac;
+    font-size: 8px;
+    text-anchor: end;
 }
+
 #titleContainer {
     width: 100%;
     display: flex;
@@ -82,14 +96,15 @@ svg {
     padding: 25px 50px;
 }
 
-#description {
+.description {
     color: #767676;
-    width: 70%;
+    width: 35%;
     font-size: 12px;
     padding: 25px 20px;
+    float: left;
 }
 
-#description input {
+.description input {
     background: none;
     border: 1px solid #93bc8e;
     border-radius: 2px;
@@ -97,21 +112,23 @@ svg {
     color: #93bc8e;
 }
 
-#description input:focus {
+.description input:focus {
     outline: none;
 }
 
-#description p {
+.description p {
     width: 100%;
+    line-height: 190%;
+    margin-top: 5px;
 }
 
 .number {
     color: #93bc8e;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .strong {
-    font-size: 16px;
+    font-size: 14px;
     color: #93bc8e;
 }
 
@@ -135,12 +152,17 @@ svg {
     position: fixed;
 }
 
-#cover .typewriter {
+#cover .intro {
     z-index: 200;
     position: fixed;
     top: 25%;
     text-align: center;
     width: 100%;
+}
+
+#cover .intro h4 {
+    color: #afaeae;
+    font-size: 32px;
 }
 
 #cover #explore,
@@ -171,20 +193,21 @@ svg {
     background: none;
     color: #93bc8e;
     font-size: 16px;
-    cursor: pointer;
     margin-bottom: 5px;
 }
 
-.typewriter p {
+.intro p {
     width: 100%;
     color: #93bc8e;
-    font-size: 24px;
-    line-height: 140%;
+    font-size: 18px;
     white-space: nowrap;
     overflow: hidden;
 }
 
-
+.intro .small {
+    color: #afaeae;
+    font-size: 12px;
+}
 
 .loading {
     animation: blink 1.5s infinite;

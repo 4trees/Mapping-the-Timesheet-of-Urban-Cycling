@@ -9,25 +9,37 @@
 
 <body>
     <div class="container">
-        <div id="titleContainer">
+        <div id="titleContainer" onclick="resetAll()">
             <div class="title">Burn your calories
                 <br>to save the planet
                 <br>by cycling</div>
-            <div id="description">
-                <p><span class="number" id="people"></span> people in Boston burned <span class="number" id="calories"></span>calories by cycling, saving <span class="number" id="co2"></span> CO<sub>2</sub> emissions.</p>
-                <p><span class="strong">I</span> cylced <span><input type="number" name="myCycle" min="5" max="120" step="1" value="0" onchange="locateMe(this.value)"></span> min today, burned <span class="number" id="myCalories">0</span> calories and saving <span class="number" id="myCO2">0</span> CO<sub>2</sub> emissions.</p>
+            <div class="description">
+                <p>Within <span class="number" id="date"></span> in Boston,
+                    <br><span class="number" id="people"></span> people cycled <span class="number" id="duration"></span> mins,
+                    <br>burned <span class="number" id="calories"></span> calories,
+                    <br>and saved <span class="number" id="co2"></span> g CO<sub>2</sub> emissions.</p>
+            </div>
+            <div class="description">
+                <p><span class="number">Today</span>,
+                    <br><span class="strong">I</span> cylced <span><input type="number" name="myCycle" min="5" max="120" step="1" value="0" onchange="locateMe(this.value)"></span> mins today,
+                        <br>burned <span class="number" id="myCalories">0</span> calories,
+                        <br>and saved <span class="number" id="myCO2">0</span> g CO<sub>2</sub> emissions.</p>
             </div>
         </div>
         <section class="canvas" id="canvas">
         </section>
         <div id="cover">
             <img class="background" src="img/background.svg">
-            <div class="typewriter">
-                <p>Instead of burning gasoline, you can burn your own 'fuel' by cycling,</p>
-                <p>greenhouse gas will also be reduced simultaneously.</p>
+            <div class="intro">
+                <h4>Burn your calories to save the planet by cycling</h4>
+                <p>Instead of burning gasoline, you can burn your own 'fuel' by cycling,
+                    <br>greenhouse gas will also be reduced simultaneously.</p>
+                <p class="small">The dataset provided by Hubway Data System from Mar 2016 - Feb 2017.</p>
             </div>
-            <div class="loading"><p>Loading...</p></div>
-            <div id="explore" class="hidden"><a onclick="removeCover()">Explore the Data</a>
+            <div class="loading">
+                <p>Loading...</p>
+            </div>
+            <div id="explore" class="hidden"><a>Explore the Data</a>
                 <br><img src="img/hand.svg"></div>
         </div>
     </div>
