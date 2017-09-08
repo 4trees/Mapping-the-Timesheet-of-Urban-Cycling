@@ -19,7 +19,7 @@ var axisY = d3.axisLeft()
     .scale(scaleY)
     .ticks(25)
     .tickSize(0)
-    .tickFormat(d => `${d}:00`);
+    .tickFormat(d => renameTime(d));
 var axisSmallX = d3.axisBottom()
     .scale(scaleoneX)
     .ticks(4)
@@ -28,15 +28,15 @@ var axisSmallX = d3.axisBottom()
 
 var testDay = new Date(new Date(new Date().setHours(0, 0, 0)).setYear(2016));
 var nowPeople, nowDuration, nowDate;
-var people = 1064053,
-    duration = 992909031,
-    date = 'one year';
+const AllPeople = 1064053,
+    AllDuration = 992909031,
+    AllDate = 'one year';
 var isOpen = false;
 
-var svgH = h * .75,
+var svgH = h * .77,
     svgW = w * .95;
 
-var oneH = svgH * .85,
+var oneH = svgH * .9,
     oneW = svgW * .45;
 var dayH = svgH * .04;
 
@@ -45,7 +45,7 @@ var svg = d3.select('#canvas')
     .attr('transform', `translate(${w * .05 / 2}, 0)`)
     .attr('width', svgW).attr('height', svgH)
 
-
+var mycycle = document.querySelector('input[name="myCycle"]')
 var nowDay = svg.append('g').attr('class', 'nowDay')
 // nowDay.append('line')
 // .attr('transform', `translate(0,${dayH + 25})`)
@@ -87,7 +87,7 @@ function dataloaded(err, trips) {
 
     people = trips.length;
     duration = d3.sum(trips, d => d.duration)
-    fillNumber(people, duration, date)
+    fillNumber(AllPeople, AllDuration, AllDate)
 
     var tripsBynest = d3.nest()
         .key(d => d.start_day)
@@ -102,7 +102,7 @@ function dataloaded(err, trips) {
     const durationByDay = d3.extent(tripsBynest.map(d => d3.sum(d.values, e => e.value.sum)))
 
     scaleX.domain(allDayinYear).range([w * .1 / 2, w * .93])
-    scaleY.domain(d3.extent(trips, d => d.start_hour)).range([oneH + dayH, dayH * 3])
+    scaleY.domain(d3.extent(trips, d => d.start_hour)).range([oneH + dayH * .25, dayH * 2.5])
     scaleR.domain(allDurationinYear)
     scaleoneX.domain(d3.extent(trips, d => d.duration))
 
@@ -119,13 +119,29 @@ function dataloaded(err, trips) {
         .attr('id', d => `dayGroup${Date.parse(d.key)}`)
         .attr('transform', d => `translate(${scaleX(new Date(d.key))},${dayH})`)
 
-    enterdays.selectAll('.circle').data(d => d.values).enter()
+    enterdays.selectAll('circle').data(d => d.values).enter()
         .append('circle').attr('r', d => scaleR(d.value.sum))
         .style('fill', d => scaleColor(d.value.people))
         .style('fill-opacity', .4)
         .style('stroke', d => scaleColor(d.value.people))
         .style('stroke-width', .5)
         .attr('cy', d => scaleY(d.value.data[0].start_hour))
+        .on('mouseover', function(d) {
+            d3.select(this).classed('highlight',true)
+        })
+        .on('mouseleave',function(d){
+            d3.select(this).classed('highlight',false)
+        })
+        .on('click', function(d) {
+            resetAll()
+            const nowDayArray = new Date(d.value.data[0].start_day).toUTCString().split(' ')
+            nowDate = `${nowDayArray[2]}. ${+nowDayArray[1]}`
+            nowPeople = d.value.people
+            nowDuration = d.value.sum
+            fillNumber(nowPeople, nowDuration, `one hour since ${renameTime(d.key)} on ${nowDate}`)
+            d3.selectAll('.selected').classed('selected', false)
+            d3.select(this).classed('selected', true)
+        })
 
     enterdays.append('rect')
         .style('fill', '#748e76')
@@ -149,22 +165,16 @@ function dataloaded(err, trips) {
         .attr('width', 3)
         .attr('height', 30)
         .style('cursor', 'pointer')
-        .on('mouseover', d => {
+        .on('mouseenter', d => {
+
             showDayName(new Date(d.key), nowDayName)
 
             nowPeople = d3.sum(d.values, e => e.value.people)
             nowDuration = d3.sum(d.values, e => e.value.sum)
 
             fillNumber(nowPeople, nowDuration, `one day on ${nowDate}`)
+
         })
-        // .on('mouseleave', d => {
-        //     if (isOpen) {
-        //         fillNumber(nowPeople, nowDuration)
-        //         console.log(nowPeople, nowDuration)
-        //     }
-
-        // })
-
         .on('click', d => {
             isOpen = true;
             prepareDay(new Date(d.key))
@@ -175,14 +185,9 @@ function dataloaded(err, trips) {
         .attr('class', 'axisLable')
         .attr('transform', `translate(${w * .09 / 2 - 2},${dayH})`)
         .html(`<tspan x=0 dy=10 >Mins</tspan><tspan x=0 dy=10 >per day</tspan>`)
-    // lable.append('tspan').text('Daily')
 
-    // lable.append('tspan').text('sum')
 
     // //Draw axis
-    // svg.append('g').attr('class', 'axis axis-x')
-    //     .attr('transform', `translate(0,${dayH})`)
-    //     .call(axisX);
     svg.append('g').attr('class', 'axis axis-y')
         .attr('transform', `translate(${w * .09 / 2},${dayH})`)
         .call(axisY);
@@ -192,6 +197,15 @@ function dataloaded(err, trips) {
     cover.select('#explore').classed('hidden', false)
     cover.on('click', d => removeCover()).style('cursor', 'pointer')
 
+}
+function renameTime(time){
+    let newTime
+    if(time > 12){
+        newTime = `${time - 12} pm`
+    }else{
+        newTime = `${time} am`
+    }
+    return newTime
 }
 
 function resetDay() {
@@ -207,7 +221,7 @@ function resetAll() {
     nowDayName.select('text').text('')
     nowDayContent.classed('hidden', true)
     isOpen = false;
-    fillNumber(people, duration, date)
+    fillNumber(AllPeople, AllDuration, AllDate)
 
 }
 
@@ -217,7 +231,7 @@ function showDayName(nowDayDate, item) {
     const nowDayArray = nowDayDate.toUTCString().split(' ')
     const realPosition = scaleX(nowDayDate)
     const fixedPosition = (realPosition + oneW) > svgW ? (realPosition - oneW - 1) : realPosition
-    nowDate = `${+nowDayArray[1]} ${nowDayArray[2]}`
+    nowDate = `${nowDayArray[2]}. ${+nowDayArray[1]}`
     item.select('.dayName').attr('transform', `translate(${fixedPosition},0)`)
         .text(nowDate)
         .attr('x', (realPosition + oneW) < svgW ? 0 : oneW)
@@ -231,7 +245,7 @@ function prepareDay(nowDayDate) {
     svg.select(`#dayGroup${Date.parse(nowDayDate)}`).selectAll('circle').classed('selected', true)
     // console.log(`#dayGroup${Date.parse(nowDayDate)}`)
 
-    svg.select(`#id${Date.parse(nowDayDate)}`).attr('height', oneH + dayH + 10).style('fill', '#d3e0d1')
+    svg.select(`#id${Date.parse(nowDayDate)}`).attr('height', oneH + dayH * .6).style('fill', '#d3e0d1')
     const realPosition = scaleX(nowDayDate)
     const fixedPosition = (realPosition + oneW) > svgW ? (realPosition - oneW - 1) : realPosition
 
@@ -263,11 +277,13 @@ function getNumber(duration) {
     return [calories, co2]
 }
 
-function fillMe(duration) {
-    let numbers = getNumber(duration);
-    document.querySelector('#myCalories').innerHTML = Math.floor(numbers[0]).toLocaleString()
-    document.querySelector('#myCO2').innerHTML = Math.floor(numbers[1]).toLocaleString()
-}
+// function fillMe(duration) {
+
+//     let numbers = getNumber(duration);
+
+//     document.querySelector('#myCalories').innerHTML = Math.floor(numbers[0]).toLocaleString()
+//     document.querySelector('#myCO2').innerHTML = Math.floor(numbers[1]).toLocaleString()
+// }
 
 function drawDay(nowDayDate, data) {
     oneDay.selectAll('.hours').remove()
@@ -298,7 +314,7 @@ function drawDay(nowDayDate, data) {
 
     var enterOnehour = updateOnehour.enter().append('g').attr('class', 'hours')
         .attr('transform', d => `translate(0,${scaleY(d.hour) + dayH})`)
-    // .on('mouseover', d => console.log(d.hour))
+
 
     var updateOne = enterOnehour.selectAll('.onecircle')
         // .attr('cx', (realPosition + oneW + 30) > svgW ? oneW : 0)
@@ -313,7 +329,7 @@ function drawDay(nowDayDate, data) {
         .style('fill', '#afaeae')
         .style('stroke', '#afaeae')
         .attr('id', d => `id${d.key}${d.values[0].start_hour}`)
-    // .on('mouseover', d => console.log(d))
+
 
     updateOnehour.exit().remove()
     // updateOne.exit().remove()
@@ -328,24 +344,26 @@ function drawDay(nowDayDate, data) {
         .transition().duration(2000)
         .attr('cx', d => scaleoneX(+d.key))
 
-    svg.select('.axis-x').attr('transform', d => `translate(0,${oneH + dayH * 2 + 10})`).call(axisSmallX);
+    svg.select('.axis-x').attr('transform', d => `translate(0,${oneH + dayH * 1.6})`).call(axisSmallX);
 
 
 }
 
-function locateMe(min) {
-    d3.select('.locateMe').classed('locateMe', false)
+// function locateMe() {
+//     let min = mycycle.value;
+//     d3.select('.locateMe').classed('locateMe', false)
 
-    if (min * 60 < 300) { min = 5 }
-    if (min * 60 > 7200) { min = 120 }
+//     if (min * 60 < 300) { min = 5 }
+//     if (min * 60 > 7200) { min = 120 }
 
-    document.querySelector('input[name="myCycle"]').value = min
-    let duration = min * 60;
-    let nowHour = new Date().getHours()
-    d3.select(`.class${Date.parse(testDay)}`).dispatch('click')
+//     mycycle.value = min
+//     let duration = min * 60;
+//     let nowHour = new Date().getHours()
+//     fillMe(duration)
+//     d3.select(`.class${Date.parse(testDay)}`).dispatch('click')
 
-    fillMe(duration)
-}
+
+// }
 
 
 function parse(d) {
