@@ -23,7 +23,7 @@ var axisY = d3.axisLeft()
 var axisSmallX = d3.axisBottom()
     .scale(scaleoneX)
     // .ticks(4)
-    .tickValues([1800,3600,5400])
+    .tickValues([1800, 3600, 5400])
     .tickSize(0)
     .tickFormat(d => `${Math.floor(d / 60)}min`);
 
@@ -126,12 +126,13 @@ function dataloaded(err, trips) {
         .style('fill-opacity', .4)
         .style('stroke', d => scaleColor(d.value.people))
         .style('stroke-width', .5)
+        .style('cursor','pointer')
         .attr('cy', d => scaleY(d.value.data[0].start_hour))
         .on('mouseover', function(d) {
-            d3.select(this).classed('highlight',true)
+            d3.select(this).classed('highlight', true)
         })
-        .on('mouseleave',function(d){
-            d3.select(this).classed('highlight',false)
+        .on('mouseleave', function(d) {
+            d3.select(this).classed('highlight', false)
         })
         .on('click', function(d) {
             resetAll()
@@ -199,11 +200,12 @@ function dataloaded(err, trips) {
     cover.on('click', d => removeCover()).style('cursor', 'pointer')
 
 }
-function renameTime(time){
+
+function renameTime(time) {
     let newTime
-    if(time > 12){
+    if (time > 12) {
         newTime = `${time - 12} pm`
-    }else{
+    } else {
         newTime = `${time} am`
     }
     return newTime
