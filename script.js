@@ -4,17 +4,12 @@ var w = window.innerWidth,
 var scaleX = d3.scaleLinear(),
     scaleY = d3.scaleLinear(),
     scaleR = d3.scaleLinear().range([1, 10]),
-    // scaleOpacity = d3.scaleLinear().range([.8, .4]),
     scaleoneX = d3.scaleLinear(),
     scaleDayY = d3.scaleLinear(),
     scaleColor = d3.scaleLinear()
     .range(['#d9e021', '#5b600f', '#ad492c']);
+
 //Axis
-// var axisX = d3.axisTop()
-//     .scale(scaleX)
-//     .tickValues([1456808400000, 1459483200000, 1462075200000, 1464753600000, 1467345600000, 1470024000000, 1472702400000, 1475294400000, 1477972800000, 1480568400000, 1483246800000, 1485925200000])
-//     .tickSize(0)
-//     .tickFormat(d3.timeFormat('%b'));
 var axisY = d3.axisLeft()
     .scale(scaleY)
     .ticks(25)
@@ -22,7 +17,6 @@ var axisY = d3.axisLeft()
     .tickFormat(d => renameTime(d));
 var axisSmallX = d3.axisBottom()
     .scale(scaleoneX)
-    // .ticks(4)
     .tickValues([1800, 3600, 5400])
     .tickSize(0)
     .tickFormat(d => `${Math.floor(d / 60)}min`);
@@ -48,8 +42,7 @@ var svg = d3.select('#canvas')
 
 var mycycle = document.querySelector('input[name="myCycle"]')
 var nowDay = svg.append('g').attr('class', 'nowDay')
-// nowDay.append('line')
-// .attr('transform', `translate(0,${dayH + 25})`)
+
 var nowDayName = nowDay.append('g')
 nowDayName.append('text').attr('class', 'dayName')
 var nowDayContent = nowDay.append('g').attr('class', 'hidden')
@@ -72,9 +65,6 @@ var seasonPoint = [
 ]
 
 
-// var durations = d3.set();
-
-
 function removeCover() {
     d3.select('#cover').classed('hidden', true)
 }
@@ -84,7 +74,7 @@ d3.queue()
     .await(dataloaded);
 
 function dataloaded(err, trips) {
-    console.log(trips)
+    // console.log(trips)
 
     people = trips.length;
     duration = d3.sum(trips, d => d.duration)
@@ -95,9 +85,8 @@ function dataloaded(err, trips) {
         .key(d => d.start_hour)
         .rollup(d => { return { data: d, sum: d3.sum(d, e => e.duration), people: d.length } })
         .entries(trips)
-    console.log(tripsBynest)
+    // console.log(tripsBynest)
 
-    // const allDayinYear = d3.extent(trips, d => d.start_day)
     const allDayinYear = d3.extent(tripsBynest, d => new Date(d.key))
     const allDurationinYear = d3.extent(tripsBynest.map(d => d.values.map(e => e.value.sum)).reduce((a, b) => a.concat(b)))
     const durationByDay = d3.extent(tripsBynest.map(d => d3.sum(d.values, e => e.value.sum)))
@@ -129,7 +118,7 @@ function dataloaded(err, trips) {
         .style('cursor', 'pointer')
         .attr('cy', d => scaleY(d.value.data[0].start_hour))
         .on('mouseover', function(d) {
-            // resetDay()
+
             nowDayName.select('text').text('')
             d3.selectAll('.highlight').classed('highlight', false)
             d3.select(this).classed('highlight', true)
@@ -141,12 +130,7 @@ function dataloaded(err, trips) {
         })
         .on('mouseleave', function(d) {
             svg.selectAll('.daily').style('fill', '#748e76')
-            // d3.select(this).classed('highlight', false)
-            // if(d3.select('.selected')){
-            //     fillNumber(nowPeople, nowDuration, `one day on ${nowDate}`)
-            // }else{
-            //     fillNumber(AllPeople, AllDuration, AllDate)
-            // }
+
             
         })
         .on('click', function(d) {
@@ -262,7 +246,6 @@ function prepareDay(nowDayDate) {
     resetDay();
     nowDayContent.classed('hidden', false)
     svg.select(`#dayGroup${Date.parse(nowDayDate)}`).selectAll('circle').classed('selected', true)
-    // console.log(`#dayGroup${Date.parse(nowDayDate)}`)
 
     svg.select(`#id${Date.parse(nowDayDate)}`).attr('height', oneH + dayH * .6).style('fill', '#d3e0d1')
     const realPosition = scaleX(nowDayDate)
@@ -296,13 +279,6 @@ function getNumber(duration) {
     return [calories, co2]
 }
 
-// function fillMe(duration) {
-
-//     let numbers = getNumber(duration);
-
-//     document.querySelector('#myCalories').innerHTML = Math.floor(numbers[0]).toLocaleString()
-//     document.querySelector('#myCO2').innerHTML = Math.floor(numbers[1]).toLocaleString()
-// }
 
 function drawDay(nowDayDate, data) {
     oneDay.selectAll('.hours').remove()
@@ -321,13 +297,6 @@ function drawDay(nowDayDate, data) {
     nowDuration = d3.sum(data, d => d.value.sum)
     fillNumber(nowPeople, nowDuration, `one day on ${nowDate}`)
 
-    // const allPeopleDay = d3.extent(onedayData.map(d => d.data.map(e => e.values.length)).reduce((a, b) => a.concat(b)))
-
-    // const mid = (allPeopleDay[0] + allPeopleDay[1]) / 2
-    // allPeopleDay.splice(1, 0, mid)
-
-    // scaleColor.domain(allPeopleDay)
-    console.log(onedayData, data)
 
     var updateOnehour = oneDay.selectAll('.hours').data(onedayData, d => d.hour)
 
@@ -336,7 +305,6 @@ function drawDay(nowDayDate, data) {
 
 
     var updateOne = enterOnehour.selectAll('.onecircle')
-        // .attr('cx', (realPosition + oneW + 30) > svgW ? oneW : 0)
         .data(d => d.data)
 
     var enterOne = updateOne.enter().append('circle')
@@ -349,56 +317,32 @@ function drawDay(nowDayDate, data) {
         .style('stroke', '#afaeae')
         .attr('id', d => `id${d.key}${d.values[0].start_hour}`)
 
-
     updateOnehour.exit().remove()
-    // updateOne.exit().remove()
 
     updateOnehour.merge(enterOnehour).attr('transform', d => `translate(0,${scaleY(d.hour) + dayH})`)
 
     updateOne
         .merge(enterOne)
         .attr('cx', fixedPosition)
-        // .style('fill', d => scaleColor(d.values.length))
-        // .style('stroke', d => scaleColor(d.values.length))
         .transition().duration(2000)
         .attr('cx', d => scaleoneX(+d.key))
 
     svg.select('.axis-x').attr('transform', d => `translate(0,${oneH + dayH * 1.6})`).call(axisSmallX);
 
-
 }
 
-// function locateMe() {
-//     let min = mycycle.value;
-//     d3.select('.locateMe').classed('locateMe', false)
-
-//     if (min * 60 < 300) { min = 5 }
-//     if (min * 60 > 7200) { min = 120 }
-
-//     mycycle.value = min
-//     let duration = min * 60;
-//     let nowHour = new Date().getHours()
-//     fillMe(duration)
-//     d3.select(`.class${Date.parse(testDay)}`).dispatch('click')
-
-
-// }
 
 
 function parse(d) {
     var date = new Date(d['starttime'].replace(/-/g, "/"));
     var refDate = new Date(date)
     var day = new Date(refDate.setHours(0, 0, 0))
-    // var mon = date.getMonth() + 1
-    // var seasons = seasonPoint.find(e => e.range.includes(mon))
+
     if (+d.tripduration > 7200 || +d.tripduration < 300) return
     return {
         start_at: date,
         start_hour: date.getHours(),
         start_day: day,
-        // season_color: seasons.color,
-        // day: date.getDay(),
-        // season: seasons.order,
         duration: +d.tripduration,
     }
 }

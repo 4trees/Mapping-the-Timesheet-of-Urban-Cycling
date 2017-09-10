@@ -104,24 +104,6 @@ body,
 }
 
 
-/*.description input {
-    background: none;
-    border-bottom: 1px solid #93bc8e;
-    border-radius: 2px;
-    width: 20px;
-    color: #93bc8e;
-}
-
-.description input:focus {
-    outline: none;
-}*/
-
-
-/*.description img{
-    width: 15px;
-    height: auto;
-}*/
-
 .description p {
     width: 100%;
     line-height: 190%;
@@ -158,14 +140,6 @@ body,
     background: #0c1c21;
 }
 
-/*#cover .background {
-    width: 95%;
-    height: 125%;
-    left: 7.5%;
-    top: 2.5%;
-    z-index: 101;
-    position: fixed;
-}*/
 
 #cover .intro {
     z-index: 200;
