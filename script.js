@@ -126,13 +126,28 @@ function dataloaded(err, trips) {
         .style('fill-opacity', .4)
         .style('stroke', d => scaleColor(d.value.people))
         .style('stroke-width', .5)
-        .style('cursor','pointer')
+        .style('cursor', 'pointer')
         .attr('cy', d => scaleY(d.value.data[0].start_hour))
         .on('mouseover', function(d) {
+            // resetDay()
+            // nowDayName.select('text').text('')
+            d3.selectAll('.highlight').classed('highlight', false)
             d3.select(this).classed('highlight', true)
+            const nowDayArray = new Date(d.value.data[0].start_day).toUTCString().split(' ')
+            thisDate = `${nowDayArray[2]}. ${+nowDayArray[1]}`
+            thisPoeple = d.value.people
+            thisDuration = d.value.sum
+            fillNumber(thisPoeple, thisDuration, `one hour since ${renameTime(d.key)} on ${thisDate}`)
         })
         .on('mouseleave', function(d) {
-            d3.select(this).classed('highlight', false)
+            svg.selectAll('.daily').style('fill', '#748e76')
+            // d3.select(this).classed('highlight', false)
+            // if(d3.select('.selected')){
+            //     fillNumber(nowPeople, nowDuration, `one day on ${nowDate}`)
+            // }else{
+            //     fillNumber(AllPeople, AllDuration, AllDate)
+            // }
+            
         })
         .on('click', function(d) {
             resetAll()
@@ -175,6 +190,7 @@ function dataloaded(err, trips) {
             nowDuration = d3.sum(d.values, e => e.value.sum)
 
             fillNumber(nowPeople, nowDuration, `one day on ${nowDate}`)
+            d3.selectAll('.highlight').classed('highlight',false)
 
         })
         .on('click', d => {

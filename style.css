@@ -17,7 +17,7 @@ body,
 }
 
 .canvas {
-    height: 79%;
+    height: 78%;
     width: 100%;
     margin: 0;
 }
@@ -91,15 +91,15 @@ body,
     color: #afaeae;
     font-size: 24px;
     width: 50%;
-    padding: 20px 5.5%;
-    line-height: 180%;
+    padding: 25px 5.5%;
+    line-height: 170%;
 }
 
 .description {
     color: #767676;
     width: 100%;
     font-size: 12px;
-    padding: 25px 20px;
+    padding: 30px 20px;
     float: left;
 }
 
@@ -172,7 +172,7 @@ body,
     margin-top: 20%;
     text-align: center;
     width: 100%;
-    height: 45%;
+    height: 40%;
 }
 
 #cover .intro h4 {
