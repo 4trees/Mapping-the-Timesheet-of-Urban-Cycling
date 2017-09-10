@@ -22,7 +22,8 @@ var axisY = d3.axisLeft()
     .tickFormat(d => renameTime(d));
 var axisSmallX = d3.axisBottom()
     .scale(scaleoneX)
-    .ticks(4)
+    // .ticks(4)
+    .tickValues([1800,3600,5400])
     .tickSize(0)
     .tickFormat(d => `${Math.floor(d / 60)}min`);
 
