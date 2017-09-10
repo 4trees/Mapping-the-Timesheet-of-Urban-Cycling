@@ -130,7 +130,7 @@ function dataloaded(err, trips) {
         .attr('cy', d => scaleY(d.value.data[0].start_hour))
         .on('mouseover', function(d) {
             // resetDay()
-            // nowDayName.select('text').text('')
+            nowDayName.select('text').text('')
             d3.selectAll('.highlight').classed('highlight', false)
             d3.select(this).classed('highlight', true)
             const nowDayArray = new Date(d.value.data[0].start_day).toUTCString().split(' ')
